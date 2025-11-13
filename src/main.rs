@@ -15,9 +15,6 @@ fn main() {
 
     let mut matrix = [[0u8; 96]; 96];
     let mut adj = 0;
-    matrix[2][2] = 1;
-    matrix[2][3] = 1;
-    matrix[2][4] = 1;
     let mut last_pos: Option<[f64; 2]> = None;
 
     println!("{}", (948.6/10.0) as u8);
@@ -50,11 +47,16 @@ fn main() {
 
         if let Some(button) = e.press_args() {
             if button == Button::Mouse(MouseButton::Left) {
-                matrix[(x/10.0) as usize][(y/10.0) as usize] = 1;
+                if matrix[(x/10.0) as usize][(y/10.0) as usize] == 0 {
+                    matrix[(x/10.0) as usize][(y/10.0) as usize] = 1;
+                } else {
+                    matrix[(x/10.0) as usize][(y/10.0) as usize] = 0;
+                }
                 println!("adding at index {}:{}", (x/10.0) as usize, (y/10.0) as usize);
             }
         };
         
+        canvas = im::ImageBuffer::new(width, height);
         for i in 0..95 {
             for j in 0..95 {
                 if matrix[i][j] == 1 {
@@ -80,13 +82,17 @@ fn main() {
                 image(&texture, c.transform, g);
             });
         }
-        
-        //break;
+        if let Some(button) = e.press_args() {
+            if button == Button::Keyboard(Key::Space) {
+                break;
+            }
+        }
     }
-    /*
+    
     while let Some(e) = window.next() {
         //println!("newframe");
         
+        canvas = im::ImageBuffer::new(width, height);
         for i in 0..95 {
             for j in 0..95 {
                 if matrix[i][j] == 1 {
@@ -154,5 +160,5 @@ fn main() {
             });
         }
     }
-    */
+    
 }
