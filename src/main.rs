@@ -1,7 +1,27 @@
 extern crate piston_window;
 extern crate image as im;
-use piston_window::*;
+use piston_window::{types::Width, *};
 
+
+
+fn draw_to_buffer(matrix: [[u8; 96]; 96], width: u32, height: u32) -> im::ImageBuffer<im::Rgba<u8>, Vec<u8>> {
+    let mut canvas = im::ImageBuffer::new(width, height);
+        for i in 0..95 {
+            for j in 0..95 {
+                if matrix[i][j] == 1 {
+                    let boundx = i*10;
+                    let boundy = j*10;
+                    for k in boundx..boundx+10 {
+                        for l in boundy..boundy+10 {
+                            canvas.put_pixel(k.try_into().unwrap(), l.try_into().unwrap(), im::Rgba([0, 0, 0, 255]));
+                        }
+                    }
+                }
+            }
+        }
+
+    return canvas;
+}
 
 fn main() {
     let opengl = OpenGL::V3_2;
@@ -56,20 +76,7 @@ fn main() {
             }
         };
         
-        canvas = im::ImageBuffer::new(width, height);
-        for i in 0..95 {
-            for j in 0..95 {
-                if matrix[i][j] == 1 {
-                    let boundx = i*10;
-                    let boundy = j*10;
-                    for k in boundx..boundx+10 {
-                        for l in boundy..boundy+10 {
-                            canvas.put_pixel(k.try_into().unwrap(), l.try_into().unwrap(), im::Rgba([0, 0, 0, 255]));
-                        }
-                    }
-                }
-            }
-        }
+        canvas = draw_to_buffer(matrix, width, height);
 
         if e.render_args().is_some() {
             //println!("rendering");
@@ -89,76 +96,71 @@ fn main() {
         }
     }
     
+    let mut frame = 0;
     while let Some(e) = window.next() {
-        //println!("newframe");
-        
-        canvas = im::ImageBuffer::new(width, height);
-        for i in 0..95 {
-            for j in 0..95 {
-                if matrix[i][j] == 1 {
-                    let boundx = i*10;
-                    let boundy = j*10;
-                    for k in boundx..boundx+10 {
-                        for l in boundy..boundy+10 {
-                            canvas.put_pixel(k.try_into().unwrap(), l.try_into().unwrap(), im::Rgba([0, 0, 0, 255]));
-                        }
-                    }
-                }
-            }
-        }
-
-        for i in 0..95 {
-            for j in 0..95 {
-                //println!("Finding adjacent cells");
-                adj = 0;
-                //checking if its on the edge
-                if j != 0 && i != 0 {
-                    adj += matrix[i-1][j];
-                    adj += matrix[i][j-1];
-                    adj += matrix[i-1][j-1];
-                } else if j != 0 {
-                    adj += matrix[i][j-1];
-                } else if i != 0 {
-                    adj += matrix[i-1][j];
-                }
-                
-                
-                if j != 95 && i != 95 {
-                    adj += matrix[i+1][j];
-                    adj += matrix[i][j+1];
-                    adj += matrix[i+1][j+1];
-                } else if j != 95 {
-                    adj += matrix[i][j+1];
-                } else if i != 95 {
-                    adj += matrix[i+1][j];
-                }
-
-                if adj < 2 {
-                    //println!("killing cell");
-                    matrix[i][j] = 0;
-                } else if adj == 3 {
-                    matrix[i][j] = 1;
-                } else if adj > 3 {
-                    //println!("killing cell");
-                    matrix[i][j] = 0;
-                }
-
-            }
-
+        println!("{}", frame);
+        if frame == 120 {
+            frame = 0;
+            //println!("newframe");
             
-        }
+            canvas = draw_to_buffer(matrix, width, height);
 
-        if e.render_args().is_some() {
-            //println!("rendering");
-            texture.update(&mut texture_context, &canvas).unwrap();
-            window.draw_2d(&e, |c, g, device| {
-                // Update texture before rendering.
-                texture_context.encoder.flush(device);
+            for i in 0..95 {
+                for j in 0..95 {
+                    //println!("Finding adjacent cells");
+                    adj = 0;
+                    //checking if its on the edge
+                    if j != 0 && i != 0 {
+                        adj += matrix[i-1][j];
+                        adj += matrix[i][j-1];
+                        adj += matrix[i-1][j-1];
+                    } else if j != 0 {
+                        adj += matrix[i][j-1];
+                    } else if i != 0 {
+                        adj += matrix[i-1][j];
+                    }
+                    
+                    
+                    if j != 95 && i != 95 {
+                        adj += matrix[i+1][j];
+                        adj += matrix[i][j+1];
+                        adj += matrix[i+1][j+1];
+                    } else if j != 95 {
+                        adj += matrix[i][j+1];
+                    } else if i != 95 {
+                        adj += matrix[i+1][j];
+                    }
 
-                clear([1.0; 4], g);
-                image(&texture, c.transform, g);
-            });
+                    if adj < 2 {
+                        //println!("killing cell");
+                        matrix[i][j] = 0;
+                    } 
+                    else if adj == 3 {
+                        matrix[i][j] = 1;
+                    } else if adj > 3 {
+                        //println!("killing cell");
+                        matrix[i][j] = 0;
+                    }
+
+                }
+
+                
+            }
+
+            if e.render_args().is_some() {
+                //println!("rendering");
+                texture.update(&mut texture_context, &canvas).unwrap();
+                window.draw_2d(&e, |c, g, device| {
+                    // Update texture before rendering.
+                    texture_context.encoder.flush(device);
+
+                    clear([1.0; 4], g);
+                    image(&texture, c.transform, g);
+                });
+            }
         }
+        frame += 1;
+
     }
     
 }
