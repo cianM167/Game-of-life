@@ -35,6 +35,7 @@ fn main() {
         .unwrap();
 
     let mut matrix = [[0u8; 96]; 96];
+    let mut numatrix = [[0u8; 96]; 96];
     let mut adj = 0;
     let mut last_pos: Option<[f64; 2]> = None;
 
@@ -110,6 +111,7 @@ fn main() {
             
             canvas = draw_to_buffer(matrix, width, height);
 
+            numatrix = [[0u8; 96]; 96];
             for i in 0..95 {
                 for j in 0..95 {
                     //println!("Finding adjacent cells");
@@ -150,19 +152,19 @@ fn main() {
 
                     if adj < 2 && matrix[i][j] == 1 {
                         println!("killing cell due to under");
-                        matrix[i][j] = 0;
+                        numatrix[i][j] = 0;
                     } 
                     else if adj == 3 && matrix[i][j] == 0 {
-                        matrix[i][j] = 1;
+                        numatrix[i][j] = 1;
                     } else if adj > 3 && matrix[i][j] == 1 {
                         println!("killing cell due to over");
-                        matrix[i][j] = 0;
+                        numatrix[i][j] = 0;
                     }
 
-                }
-
-                
+                }  
             }
+
+            matrix = numatrix;
 
             if e.render_args().is_some() {
                 //println!("rendering");
