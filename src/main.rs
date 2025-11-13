@@ -1,3 +1,4 @@
+//#![windows_subsystem = "windows"]
 extern crate piston_window;
 extern crate image as im;
 use piston_window::{types::Width, *};
@@ -37,7 +38,7 @@ fn main() {
     let mut adj = 0;
     let mut last_pos: Option<[f64; 2]> = None;
 
-    println!("{}", (948.6/10.0) as u8);
+    //println!("{}", (948.6/10.0) as u8);
 
     /* 
     println!("New frame:");
@@ -62,17 +63,21 @@ fn main() {
         let mut draw = false;
         if let Some(pos) = e.mouse_cursor_args() {
             (x, y) = (pos[0] as f32, pos[1] as f32);
-            println!("{}:{}",x, y);
+            //println!("{}:{}",x, y);
         }
 
         if let Some(button) = e.press_args() {
             if button == Button::Mouse(MouseButton::Left) {
-                if matrix[(x/10.0) as usize][(y/10.0) as usize] == 0 {
-                    matrix[(x/10.0) as usize][(y/10.0) as usize] = 1;
-                } else {
-                    matrix[(x/10.0) as usize][(y/10.0) as usize] = 0;
+                let arx = (x/10.0) as usize;
+                let ary = (y/10.0) as usize;
+                if arx < 96 && ary < 96 {
+                    if matrix[arx][ary] == 0 {
+                        matrix[arx][ary] = 1;
+                    } else {
+                        matrix[arx][ary] = 0;
+                    }
                 }
-                println!("adding at index {}:{}", (x/10.0) as usize, (y/10.0) as usize);
+                //println!("adding at index {}:{}", (x/10.0) as usize, (y/10.0) as usize);
             }
         };
         
@@ -98,7 +103,7 @@ fn main() {
     
     let mut frame = 0;
     while let Some(e) = window.next() {
-        println!("{}", frame);
+        //println!("{}", frame);
         if frame == 120 {
             frame = 0;
             //println!("newframe");
@@ -109,6 +114,7 @@ fn main() {
                 for j in 0..95 {
                     //println!("Finding adjacent cells");
                     adj = 0;
+
                     //checking if its on the edge
                     if j != 0 && i != 0 {
                         adj += matrix[i-1][j];
@@ -119,8 +125,7 @@ fn main() {
                     } else if i != 0 {
                         adj += matrix[i-1][j];
                     }
-                    
-                    
+                                        
                     if j != 95 && i != 95 {
                         adj += matrix[i+1][j];
                         adj += matrix[i][j+1];
@@ -131,14 +136,26 @@ fn main() {
                         adj += matrix[i+1][j];
                     }
 
-                    if adj < 2 {
-                        //println!("killing cell");
+                    if i != 0 && j != 95 {
+                        adj += matrix[i-1][j+1];
+                    }
+
+                    if i != 95 && j != 0 {
+                        adj += matrix[i+1][j-1];
+                    }
+
+                    if adj != 0 {
+                        println!("adl:{}", adj)
+                    }
+
+                    if adj < 2 && matrix[i][j] == 1 {
+                        println!("killing cell due to under");
                         matrix[i][j] = 0;
                     } 
-                    else if adj == 3 {
+                    else if adj == 3 && matrix[i][j] == 0 {
                         matrix[i][j] = 1;
-                    } else if adj > 3 {
-                        //println!("killing cell");
+                    } else if adj > 3 && matrix[i][j] == 1 {
+                        println!("killing cell due to over");
                         matrix[i][j] = 0;
                     }
 
