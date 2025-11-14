@@ -1,4 +1,4 @@
-//#![windows_subsystem = "windows"]
+#![windows_subsystem = "windows"]
 extern crate piston_window;
 extern crate image as im;
 use piston_window::{types::Width, *};
@@ -105,7 +105,7 @@ fn main() {
     let mut frame = 0;
     while let Some(e) = window.next() {
         //println!("{}", frame);
-        if frame == 120 {
+        if frame == 60 {
             frame = 0;
             //println!("newframe");
             
